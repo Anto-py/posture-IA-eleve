@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon rapport à l'IA à l'école</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        
+        /* Thème clair uniquement - contraste optimal */
+        
+        /* Fonds clairs - texte noir pour un contraste parfait */
+        .bg-white,
+        .bg-gray-50,
+        .bg-blue-50,
+        .bg-green-50,
+        .bg-orange-50,
+        .bg-purple-50,
+        .bg-indigo-50 {
+            color: #1f2937 !important;
+        }
+        
+        .bg-white .text-gray-800,
+        .bg-white .text-gray-700,
+        .bg-white .text-gray-600,
+        .bg-gray-50 .text-gray-800,
+        .bg-gray-50 .text-gray-700,
+        .bg-gray-50 .text-gray-600,
+        .bg-blue-50 .text-blue-800,
+        .bg-blue-50 .text-blue-700,
+        .bg-green-50 .text-green-800,
+        .bg-green-50 .text-green-700,
+        .bg-orange-50 .text-orange-800,
+        .bg-orange-50 .text-orange-700,
+        .bg-purple-50 .text-purple-800,
+        .bg-indigo-50 .text-indigo-800 {
+            color: #1f2937 !important;
+        }
+        
+        /* Fonds foncés (gradients) - texte blanc */
+        .bg-gradient-to-r {
+            color: #f8fafc !important;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Écran d'accueil -->
+        <div id="welcome-screen" class="fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+                <div class="mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <span class="text-white text-2xl">🤖</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4">Mon rapport à l'IA à l'école</h1>
+                    <p class="text-lg text-gray-600 mb-6">Découvre ta posture face à l'intelligence artificielle</p>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-6 mb-8 text-left">
+                    <h2 class="font-semibold text-blue-800 mb-3">À propos de ce questionnaire :</h2>
+                    <ul class="text-blue-800 space-y-2">
+                        <li>• <strong>Anonyme</strong> : Tes réponses restent privées</li>
+                        <li>• <strong>Sans jugement</strong> : Il n'y a pas de bonnes ou mauvaises réponses</li>
+                        <li>• <strong>20 questions</strong> : Environ 8 minutes de ton temps</li>
+                        <li>• <strong>Résultat personnalisé</strong> : Tu recevras des conseils adaptés</li>
+                    </ul>
+                </div>
+                
+                <button onclick="startQuiz()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105">
+                    Commencer le questionnaire
+                </button>
+            </div>
+        </div>
+
+        <!-- Écran des questions -->
+        <div id="question-screen" class="hidden fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <!-- Barre de progression -->
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Question <span id="current-question">1</span> sur 20</span>
+                        <span class="text-sm font-medium text-gray-700"><span id="progress-percent">5</span>%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full progress-bar" style="width: 5%"></div>
+                    </div>
+                </div>
+
+                <!-- Question -->
+                <div class="mb-8">
+                    <h2 id="question-text" class="text-xl font-semibold text-gray-800 mb-6"></h2>
+                    <div id="answers-container" class="space-y-3">
+                        <!-- Les réponses seront générées ici -->
+                    </div>
+                </div>
+
+                <!-- Boutons de navigation -->
+                <div class="flex justify-between">
+                    <button id="prev-btn" onclick="previousQuestion()" class="px-6 py-2 border border-gray-400 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Précédent
+                    </button>
+                    <button id="next-btn" onclick="nextQuestion()" class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Suivant
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran des résultats -->
+        <div id="results-screen" class="hidden fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <span class="text-white text-3xl">✨</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Ton rapport personnel — Mon rapport à l'IA</h1>
+                    <p class="text-gray-800">Voici ton profil face à l'IA à l'école</p>
+                </div>
+
+                <!-- Bloc Résultats -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-8 text-center">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Résultats</h2>
+                    <div class="text-2xl font-bold text-gray-800" id="results-summary">
+                        <!-- E = X% | O = Y% | S = Z% sera généré ici -->
+                    </div>
+                </div>
+
+                <!-- Graphique des résultats -->
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Répartition de tes réponses</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-medium text-green-800">Engagé réflexif</span>
+                                    <span id="score-e-percent" class="text-sm font-bold text-green-800">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div id="bar-e" class="bg-green-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-medium text-blue-800">Occasionnel légaliste</span>
+                                    <span id="score-o-percent" class="text-sm font-bold text-blue-800">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div id="bar-o" class="bg-blue-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-sm font-medium text-orange-800">Scolaire opportuniste</span>
+                                    <span id="score-s-percent" class="text-sm font-bold text-orange-800">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div id="bar-s" class="bg-orange-500 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="profile-description" class="bg-gray-50 rounded-lg p-6">
+                        <!-- Description du profil sera générée ici -->
+                    </div>
+                </div>
+
+                <!-- Conseils personnalisés -->
+                <div id="advice-section" class="bg-blue-50 rounded-lg p-6 mb-8">
+                    <!-- Conseils seront générés ici -->
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="reviewAnswers()" class="px-6 py-3 bg-gray-100 text-gray-800 rounded-lg font-semibold hover:bg-gray-200 transition-colors duration-200">
+                        👁️ Revoir mes réponses
+                    </button>
+                    <button onclick="downloadPDF()" class="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 text-white rounded-lg font-semibold hover:from-green-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105">
+                        📄 Télécharger mon rapport (PDF)
+                    </button>
+                    <button onclick="restartQuiz()" class="px-6 py-3 border-2 border-blue-500 text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200">
+                        🔄 Recommencer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Questions et réponses
+        const questions = [
+            {
+                text: "Quand tu utilises une IA, ton but principal est…",
+                answers: [
+                    { text: "Obtenir une aide ponctuelle sans tricher.", type: "O" },
+                    { text: "Trouver des idées/structure puis retravailler à ta façon.", type: "E" },
+                    { text: "Gagner du temps sur un devoir.", type: "S" }
+                ]
+            },
+            {
+                text: "Si l'IA te donne une réponse fausse ou floue, tu…",
+                answers: [
+                    { text: "Reformules ton prompt.", type: "E" },
+                    { text: "Compares avec ton cours.", type: "O" },
+                    { text: "Copies ce qui te parait correct", type: "S" }
+                ]
+            },
+            {
+                text: "Pour toi, utiliser l'IA pour un devoir, c'est surtout…",
+                answers: [
+                    { text: "Un moyen d'aller plus vite.", type: "S" },
+                    { text: "Une façon d'apprendre autrement.", type: "E" },
+                    { text: "Un petit coup de pouce discret.", type: "O" }
+                ]
+            },
+            {
+                text: "Quand tu poses une question à l'IA, tu…",
+                answers: [
+                    { text: "Fais attention à ne pas trop l'utiliser.", type: "O" },
+                    { text: "Reformules jusqu'à une réponse claire.", type: "E" },
+                    { text: "Prends la première réponse correcte.", type: "S" }
+                ]
+            },
+            {
+                text: "Si un prof encourage l'IA, tu penses que…",
+                answers: [
+                    { text: "Super, je gagnerai du temps.", type: "S" },
+                    { text: "C'est une occasion de mieux comprendre.", type: "E" },
+                    { text: "C'est OK si tu sais exactement ce qui est autorisé.", type: "O" }
+                ]
+            },
+            {
+                text: "Quand tu rends un travail aidé par l'IA, tu…",
+                answers: [
+                    { text: "Te demandes si tu dois le dire ou pas.", type: "O" },
+                    { text: "Ne dis rien et camoufles.", type: "S" },
+                    { text: "Indiques comment tu l'as utilisée.", type: "E" }
+                ]
+            },
+            {
+                text: "Pour comprendre une notion difficile, tu utilises l'IA pour…",
+                answers: [
+                    { text: "Avoir une explication rapide puis tu relis ton cours pour vérifier.", type: "O" },
+                    { text: "Obtenir des explications que tu peux approfondir en posant de nombreuses questions .", type: "E" },
+                    { text: "Demander une réponse à copier.", type: "S" }
+                ]
+            },
+            {
+                text: "Si un camarade t'envoie une rédaction faite par IA…",
+                answers: [
+                    { text: "Tu regardes mais tu rédiges la tienne.", type: "O" },
+                    { text: "Tu cherches à savoir comment tu pourrais l'améliorer", type: "E" },
+                    { text: "Tu changes quelques phrases et rends.", type: "S" }
+                ]
+            },
+            {
+                text: "L'IA peut aider à apprendre ?",
+                answers: [
+                    { text: "Oui, ça remplace parfois les cours.", type: "S" },
+                    { text: "Oui, si on réfléchit et reformule.", type: "E" },
+                    { text: "Oui, mais attention à la triche.", type: "O" }
+                ]
+            },
+            {
+                text: "Quand tu travailles avec l'IA, tu ressens…",
+                answers: [
+                    { text: "Méfiance (peur de mal faire).", type: "O" },
+                    { text: "Satisfaction quand ça travaille à ma place.", type: "S" },
+                    { text: "Curiosité et envie de tester.", type: "E" },
+                ]
+            },
+            {
+                text: "Si l'IA est interdite, tu…",
+                answers: [
+                    { text: "L'utilises discrètement.", type: "S" },
+                    { text: "Respectes et aimerais en discuter avec l'enseignant.", type: "E" },
+                    { text: "Respectes sans réfléchir.", type: "O" }
+                ]
+            },
+            {
+                text: "Quand tu utilises l'IA, tu fais attention à…",
+                answers: [
+                    { text: "Ce qui est autorisé.", type: "O" },
+                    { text: "La qualité des sources/véracité.", type: "E" },
+                    { text: "Finir vite.", type: "S" }
+                ]
+            },
+            {
+                text: "Quelle phrase te ressemble le plus ?",
+                answers: [
+                    { text: "L'IA est pratique pour aller vite.", type: "S" },
+                    { text: "L'IA approfondit mes apprentissages.", type: "E" },
+                    { text: "L'IA m'aide mais j'ai un peu l'impression de tricher", type: "O" }
+                ]
+            },
+            {
+                text: "Avant de rendre un texte généré par IA, tu…",
+                answers: [
+                    { text: "Veux être sûr d'avoir bien compris les consignes concernant l'utilisation de l'IA", type: "O" },
+                    { text: "Vérifie la justesse des infomations, reformule tout ce que tu as envie de reformuler", type: "E" },
+                    { text: "Changes un peu pour que ça se voie moins.", type: "S" }
+                ]
+            },
+            {
+                text: "Si l'IA se trompe, c'est parce que…",
+                answers: [
+                    { text: "Je n'aurais pas dû utiliser l'IA.", type: "O" },
+                    { text: "Ma question était mal formulée.", type: "E" },
+                    { text: "Ce n'est pas grave.", type: "S" }
+                ]
+            },
+            {
+                text: "Le rôle de l'IA à l'école devrait être…",
+                answers: [
+                    { text: "Un assistant pour gagner du temps.", type: "S" },
+                    { text: "Un outil d'apprentissage critique.", type: "E" },
+                    { text: "Un soutien avec règles claires.", type: "O" }
+                ]
+            },
+            {
+                text: "Tu fais confiance à l'IA quand elle explique ?",
+                answers: [
+                    { text: "Oui, sauf si c'est contraire à ce qu'à dit l'enseignant.", type: "O" },
+                    { text: "Je vérifie toujours ailleurs.", type: "E" },
+                    { text: "Oui, je ne perd pas de temps à vérifier.", type: "S" }
+                ]
+            },
+            {
+                text: "Quand un prof parle d'IA, tu…",
+                answers: [
+                    { text: "Écoutes sans avis.", type: "O" },
+                    { text: "Participes et poses des questions.", type: "E" },
+                    { text: "T'ennuies, c'est évident.", type: "S" }
+                ]
+            },
+            {
+                text: "Si tu pouvais créer un outil IA, il…",
+                answers: [
+                    { text: "Donnerait des réponses fiables vite.", type: "S" },
+                    { text: "Aiderait à apprendre par explications adaptées.", type: "E" },
+                    { text: "Serait autorisé partout.", type: "O" }
+                ]
+            },
+            {
+                text: "Apprendre à bien utiliser l'IA à l'école, c'est…",
+                answers: [
+                    { text: "Utile mais pas prioritaire.", type: "O" },
+                    { text: "Indispensable pour le futur.", type: "E" },
+                    { text: "Utile pour aller à l'essentiel", type: "S" }
+                ]
+            }
+        ];
+
+        // Variables globales
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let scores = { E: 0, O: 0, S: 0, N: 0 };
+
+        // Démarrer le questionnaire
+        function startQuiz() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('question-screen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        // Afficher une question
+        function showQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question-text').textContent = question.text;
+            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+            document.getElementById('progress-percent').textContent = Math.round(((currentQuestionIndex + 1) / questions.length) * 100);
+            document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+
+            const container = document.getElementById('answers-container');
+            container.innerHTML = '';
+
+            question.answers.forEach((answer, index) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.innerHTML = `
+                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+                        <input type="radio" name="answer" value="${index}" class="mr-3 text-blue-600">
+                        <span class="text-gray-700">${answer.text}</span>
+                    </label>
+                `;
+                container.appendChild(answerDiv);
+            });
+
+            // Restaurer la réponse précédente si elle existe
+            if (answers[currentQuestionIndex] !== undefined) {
+                const radio = document.querySelector(`input[value="${answers[currentQuestionIndex]}"]`);
+                if (radio) radio.checked = true;
+                updateNextButton();
+            }
+
+            // Écouter les changements de réponse
+            document.querySelectorAll('input[name="answer"]').forEach(radio => {
+                radio.addEventListener('change', updateNextButton);
+            });
+
+            // Mettre à jour les boutons
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            updateNextButton();
+        }
+
+        // Mettre à jour le bouton suivant
+        function updateNextButton() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            document.getElementById('next-btn').disabled = !selected;
+        }
+
+        // Question suivante
+        function nextQuestion() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (!selected) return;
+
+            answers[currentQuestionIndex] = parseInt(selected.value);
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                calculateResults();
+                showResults();
+            }
+        }
+
+        // Question précédente
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        // Calculer les résultats
+        function calculateResults() {
+            scores = { E: 0, O: 0, S: 0, N: 0 };
+            
+            answers.forEach((answerIndex, questionIndex) => {
+                const answerType = questions[questionIndex].answers[answerIndex].type;
+                scores[answerType]++;
+            });
+        }
+
+        // Afficher les résultats
+        function showResults() {
+            document.getElementById('question-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+
+            const totalNonNeutral = scores.E + scores.O + scores.S;
+            
+            if (totalNonNeutral === 0) {
+                showIndeterminateProfile();
+                return;
+            }
+
+            const percentages = {
+                E: Math.round((scores.E / totalNonNeutral) * 100),
+                O: Math.round((scores.O / totalNonNeutral) * 100),
+                S: Math.round((scores.S / totalNonNeutral) * 100)
+            };
+
+            // Afficher les pourcentages et barres
+            setTimeout(() => {
+                document.getElementById('score-e-percent').textContent = `${percentages.E}%`;
+                document.getElementById('score-o-percent').textContent = `${percentages.O}%`;
+                document.getElementById('score-s-percent').textContent = `${percentages.S}%`;
+                
+                document.getElementById('bar-e').style.width = `${percentages.E}%`;
+                document.getElementById('bar-o').style.width = `${percentages.O}%`;
+                document.getElementById('bar-s').style.width = `${percentages.S}%`;
+
+                // Mettre à jour le résumé des résultats
+                document.getElementById('results-summary').textContent = `E = ${percentages.E}% | O = ${percentages.O}% | S = ${percentages.S}%`;
+            }, 500);
+
+            // Déterminer le profil selon les nouvelles règles
+            determineProfile(percentages);
+        }
+
+        // Déterminer le profil selon les critères spécifiés
+        function determineProfile(percentages) {
+            const maxScore = Math.max(percentages.E, percentages.O, percentages.S);
+            const dominantTypes = [];
+            
+            // Identifier les types dominants
+            if (percentages.E === maxScore) dominantTypes.push('E');
+            if (percentages.O === maxScore) dominantTypes.push('O');
+            if (percentages.S === maxScore) dominantTypes.push('S');
+
+            // Vérifier si une posture est ≥ 40% et strictement dominante
+            let isDominant = false;
+            let dominantType = null;
+
+            if (dominantTypes.length === 1 && maxScore >= 40) {
+                // Vérifier que l'écart avec les autres est > 10 points
+                const otherScores = Object.values(percentages).filter(score => score !== maxScore);
+                const maxOtherScore = Math.max(...otherScores);
+                
+                if (maxScore - maxOtherScore >= 10) {
+                    isDominant = true;
+                    dominantType = dominantTypes[0];
+                }
+            }
+
+            if (isDominant) {
+                showDominantProfile(dominantType, percentages);
+            } else {
+                showMixedProfile(percentages);
+            }
+        }
+
+        // Profil dominant
+        function showDominantProfile(profile, percentages) {
+            const profiles = {
+                E: {
+                    title: "Engagé réflexif",
+                    description: "Tu utilises l'IA pour apprendre : reformulation, vérification, curiosité. Continue à demander pourquoi et à comparer aux cours.",
+                    color: "green-800"
+                },
+                O: {
+                    title: "Occasionnel légaliste",
+                    description: "Tu es prudent et respectes les règles. Pour progresser : ose reformuler, demande des explications pas à pas, compare plusieurs sources, explicite comment tu utilises l'IA.",
+                    color: "blue-800"
+                },
+                S: {
+                    title: "Scolaire opportuniste",
+                    description: "Tu utilises l'IA surtout pour aller vite. Pour progresser : relis et réécris avec tes mots, demande à l'IA d'expliquer comment elle a construit sa réponse, vérifie avec le cours, crée ta version améliorée.",
+                    color: "orange-800"
+                }
+            };
+
+            const profileData = profiles[profile];
+            document.getElementById('profile-description').innerHTML = `
+                <h3 class="text-lg font-semibold text-${profileData.color} mb-3">Ta posture actuelle : ${profileData.title}</h3>
+                <p class="text-gray-800">${profileData.description}</p>
+            `;
+
+            showAdviceSection();
+        }
+
+        // Profil mixte
+        function showMixedProfile(percentages) {
+            document.getElementById('profile-description').innerHTML = `
+                <h3 class="text-lg font-semibold text-purple-800 mb-3">Profil mixte</h3>
+                <p class="text-gray-800">Tu combines plusieurs postures. Choisis une habitude "réflexive" à tester cette semaine (reformuler, vérifier les sources, expliquer pourquoi).</p>
+            `;
+
+            showAdviceSection();
+        }
+
+        // Conseils vers l'engagé réflexif (toujours afficher)
+        function showAdviceSection() {
+            document.getElementById('advice-section').innerHTML = `
+                <h3 class="text-lg font-semibold text-blue-800 mb-4">Conseils "vers l'engagé réflexif"</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start">
+                        <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3 mt-0.5">1</span>
+                        <p class="text-blue-800">Reformule tes questions et réponses.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3 mt-0.5">2</span>
+                        <p class="text-blue-800">Vérifie avec tes notes ou d'autres sources.</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3 mt-0.5">3</span>
+                        <p class="text-blue-800">Explique le raisonnement demandé (pas seulement la réponse).</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3 mt-0.5">4</span>
+                        <p class="text-blue-800">Personnalise le texte (exemples, vocabulaire à toi).</p>
+                    </div>
+                    <div class="flex items-start">
+                        <span class="bg-blue-100 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-semibold mr-3 mt-0.5">5</span>
+                        <p class="text-blue-800">Rends transparent l'usage de l'IA (dire comment et pourquoi).</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Profil indéterminé
+        function showIndeterminateProfile() {
+            document.getElementById('profile-description').innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Profil indéterminé</h3>
+                <p class="text-gray-800">Tes réponses ne permettent pas de définir une posture claire face à l'IA. Tu es peut-être encore en phase de découverte.</p>
+            `;
+
+            document.getElementById('advice-section').innerHTML = `
+                <h3 class="text-lg font-semibold text-blue-800 mb-3">Conseils pour commencer</h3>
+                <p class="text-blue-800">Prends le temps d'expérimenter avec l'IA dans un cadre scolaire. Commence par de petites questions et observe comment elle peut t'aider à apprendre.</p>
+            `;
+        }
+
+        // Télécharger le PDF
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Titre principal
+            doc.setFontSize(18);
+            doc.text('Ton rapport personnel — Mon rapport à l\'IA', 20, 25);
+            
+            // Bloc Résultats
+            doc.setFontSize(14);
+            doc.text('Résultats :', 20, 45);
+            
+            const totalNonNeutral = scores.E + scores.O + scores.S;
+            if (totalNonNeutral > 0) {
+                const percentages = {
+                    E: Math.round((scores.E / totalNonNeutral) * 100),
+                    O: Math.round((scores.O / totalNonNeutral) * 100),
+                    S: Math.round((scores.S / totalNonNeutral) * 100)
+                };
+                
+                doc.setFontSize(12);
+                doc.text(`E = ${percentages.E}% | O = ${percentages.O}% | S = ${percentages.S}%`, 20, 60);
+                
+                // Détails des pourcentages
+                doc.text(`Engagé réflexif (E) : ${percentages.E}%`, 30, 75);
+                doc.text(`Occasionnel légaliste (O) : ${percentages.O}%`, 30, 85);
+                doc.text(`Scolaire opportuniste (S) : ${percentages.S}%`, 30, 95);
+            }
+            
+            // Interprétation du profil
+            const profileText = document.getElementById('profile-description').textContent;
+            
+            doc.setFontSize(14);
+            doc.text('Interprétation :', 20, 115);
+            doc.setFontSize(10);
+            const splitProfile = doc.splitTextToSize(profileText, 170);
+            doc.text(splitProfile, 20, 125);
+            
+            // Conseils vers l'engagé réflexif
+            doc.setFontSize(14);
+            doc.text('Conseils "vers l\'engagé réflexif" :', 20, 160);
+            doc.setFontSize(10);
+            
+            const adviceList = [
+                '1. Reformule tes questions et réponses.',
+                '2. Vérifie avec tes notes ou d\'autres sources.',
+                '3. Explique le raisonnement demandé (pas seulement la réponse).',
+                '4. Personnalise le texte (exemples, vocabulaire à toi).',
+                '5. Rends transparent l\'usage de l\'IA (dire comment et pourquoi).'
+            ];
+            
+            let yPosition = 170;
+            adviceList.forEach(advice => {
+                doc.text(advice, 20, yPosition);
+                yPosition += 10;
+            });
+            
+            // Note de confidentialité
+            doc.setFontSize(8);
+            doc.text('Ce rapport est personnel et confidentiel. Aucune donnée nominative n\'est collectée.', 20, 250);
+            
+            doc.save('mon-rapport-ia-ecole.pdf');
+        }
+
+        // Revoir les réponses
+        function reviewAnswers() {
+            let reviewHTML = '<div class="space-y-4">';
+            
+            questions.forEach((question, index) => {
+                const userAnswerIndex = answers[index];
+                const userAnswer = question.answers[userAnswerIndex];
+                const answerType = userAnswer.type;
+                
+                let typeColor = 'gray';
+                let typeName = 'Neutre';
+                
+                if (answerType === 'E') {
+                    typeColor = 'green';
+                    typeName = 'Engagé réflexif';
+                } else if (answerType === 'O') {
+                    typeColor = 'blue';
+                    typeName = 'Occasionnel légaliste';
+                } else if (answerType === 'S') {
+                    typeColor = 'orange';
+                    typeName = 'Scolaire opportuniste';
+                }
+                
+                reviewHTML += `
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">Question ${index + 1}</h4>
+                        <p class="text-gray-600 mb-3">${question.text}</p>
+                        <div class="bg-${typeColor}-50 border border-${typeColor}-200 rounded p-3">
+                            <p class="text-${typeColor}-800 font-medium">Ta réponse :</p>
+                            <p class="text-${typeColor}-800">${userAnswer.text}</p>
+                            <span class="inline-block mt-2 px-2 py-1 bg-${typeColor}-100 text-${typeColor}-800 text-xs rounded-full">${typeName}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reviewHTML += '</div>';
+            
+            // Créer une modal pour afficher les réponses
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl shadow-lg max-w-4xl max-h-full overflow-y-auto p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Révision de tes réponses</h2>
+                        <button onclick="closeReviewModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                    </div>
+                    ${reviewHTML}
+                    <div class="mt-6 text-center">
+                        <button onclick="closeReviewModal()" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            Fermer
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        // Fermer la modal de révision
+        function closeReviewModal() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) {
+                document.body.removeChild(modal);
+            }
+        }
+
+        // Recommencer
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            answers = [];
+            scores = { E: 0, O: 0, S: 0, N: 0 };
+            
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('welcome-screen').classList.remove('hidden');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992a5c9f578c1327',t:'MTc2MTE1MDQ0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
