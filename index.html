@@ -368,66 +368,100 @@
         // Variables globales
         let currentQuestionIndex = 0;
         let answers = [];
-        let scores = { E: 0, O: 0, S: 0, N: 0 };
+        let scores = { E: 0, O: 0, S: 0 };
+        let lastPercentages = { E: 0, O: 0, S: 0 };
+        let lastProfileDetails = { title: '', description: '' };
+
+        const dom = {
+            welcomeScreen: document.getElementById('welcome-screen'),
+            questionScreen: document.getElementById('question-screen'),
+            resultsScreen: document.getElementById('results-screen'),
+            questionText: document.getElementById('question-text'),
+            currentQuestion: document.getElementById('current-question'),
+            progressPercent: document.getElementById('progress-percent'),
+            progressBar: document.getElementById('progress-bar'),
+            answersContainer: document.getElementById('answers-container'),
+            prevBtn: document.getElementById('prev-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            scoreEPercent: document.getElementById('score-e-percent'),
+            scoreOPercent: document.getElementById('score-o-percent'),
+            scoreSPercent: document.getElementById('score-s-percent'),
+            barE: document.getElementById('bar-e'),
+            barO: document.getElementById('bar-o'),
+            barS: document.getElementById('bar-s'),
+            resultsSummary: document.getElementById('results-summary'),
+            profileDescription: document.getElementById('profile-description'),
+            adviceSection: document.getElementById('advice-section')
+        };
 
         // Démarrer le questionnaire
         function startQuiz() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('question-screen').classList.remove('hidden');
+            dom.welcomeScreen.classList.add('hidden');
+            dom.questionScreen.classList.remove('hidden');
             showQuestion();
         }
 
         // Afficher une question
         function showQuestion() {
             const question = questions[currentQuestionIndex];
-            document.getElementById('question-text').textContent = question.text;
-            document.getElementById('current-question').textContent = currentQuestionIndex + 1;
-            document.getElementById('progress-percent').textContent = Math.round(((currentQuestionIndex + 1) / questions.length) * 100);
-            document.getElementById('progress-bar').style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+            dom.questionText.textContent = question.text;
+            dom.currentQuestion.textContent = currentQuestionIndex + 1;
+            const progressRatio = (currentQuestionIndex + 1) / questions.length;
+            dom.progressPercent.textContent = Math.round(progressRatio * 100);
+            dom.progressBar.style.width = `${progressRatio * 100}%`;
 
-            const container = document.getElementById('answers-container');
+            const container = dom.answersContainer;
             container.innerHTML = '';
 
+            const fragment = document.createDocumentFragment();
+
             question.answers.forEach((answer, index) => {
-                const answerDiv = document.createElement('div');
-                answerDiv.innerHTML = `
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
-                        <input type="radio" name="answer" value="${index}" class="mr-3 text-blue-600">
-                        <span class="text-gray-700">${answer.text}</span>
-                    </label>
-                `;
-                container.appendChild(answerDiv);
+                const wrapper = document.createElement('div');
+                const label = document.createElement('label');
+                label.className = 'flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200';
+
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'answer';
+                input.value = String(index);
+                input.className = 'mr-3 text-blue-600';
+                input.addEventListener('change', updateNextButton);
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'text-gray-700';
+                textSpan.textContent = answer.text;
+
+                label.appendChild(input);
+                label.appendChild(textSpan);
+                wrapper.appendChild(label);
+                fragment.appendChild(wrapper);
             });
+
+            container.appendChild(fragment);
 
             // Restaurer la réponse précédente si elle existe
             if (answers[currentQuestionIndex] !== undefined) {
-                const radio = document.querySelector(`input[value="${answers[currentQuestionIndex]}"]`);
+                const radio = container.querySelector(`input[name="answer"][value="${answers[currentQuestionIndex]}"]`);
                 if (radio) radio.checked = true;
-                updateNextButton();
             }
 
-            // Écouter les changements de réponse
-            document.querySelectorAll('input[name="answer"]').forEach(radio => {
-                radio.addEventListener('change', updateNextButton);
-            });
-
             // Mettre à jour les boutons
-            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            dom.prevBtn.disabled = currentQuestionIndex === 0;
             updateNextButton();
         }
 
         // Mettre à jour le bouton suivant
         function updateNextButton() {
-            const selected = document.querySelector('input[name="answer"]:checked');
-            document.getElementById('next-btn').disabled = !selected;
+            const selected = dom.answersContainer.querySelector('input[name="answer"]:checked');
+            dom.nextBtn.disabled = !selected;
         }
 
         // Question suivante
         function nextQuestion() {
-            const selected = document.querySelector('input[name="answer"]:checked');
+            const selected = dom.answersContainer.querySelector('input[name="answer"]:checked');
             if (!selected) return;
 
-            answers[currentQuestionIndex] = parseInt(selected.value);
+            answers[currentQuestionIndex] = parseInt(selected.value, 10);
 
             if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
@@ -448,22 +482,41 @@
 
         // Calculer les résultats
         function calculateResults() {
-            scores = { E: 0, O: 0, S: 0, N: 0 };
-            
+            scores = { E: 0, O: 0, S: 0 };
+
             answers.forEach((answerIndex, questionIndex) => {
-                const answerType = questions[questionIndex].answers[answerIndex].type;
-                scores[answerType]++;
+                if (typeof answerIndex !== 'number') {
+                    return;
+                }
+
+                const selectedAnswer = questions[questionIndex].answers[answerIndex];
+                if (!selectedAnswer) {
+                    return;
+                }
+
+                const answerType = selectedAnswer.type;
+                if (scores[answerType] !== undefined) {
+                    scores[answerType]++;
+                }
             });
         }
 
         // Afficher les résultats
         function showResults() {
-            document.getElementById('question-screen').classList.add('hidden');
-            document.getElementById('results-screen').classList.remove('hidden');
+            dom.questionScreen.classList.add('hidden');
+            dom.resultsScreen.classList.remove('hidden');
 
             const totalNonNeutral = scores.E + scores.O + scores.S;
-            
+
             if (totalNonNeutral === 0) {
+                lastPercentages = { E: 0, O: 0, S: 0 };
+                dom.scoreEPercent.textContent = '0%';
+                dom.scoreOPercent.textContent = '0%';
+                dom.scoreSPercent.textContent = '0%';
+                dom.barE.style.width = '0%';
+                dom.barO.style.width = '0%';
+                dom.barS.style.width = '0%';
+                dom.resultsSummary.textContent = 'E = 0% | O = 0% | S = 0%';
                 showIndeterminateProfile();
                 return;
             }
@@ -474,18 +527,20 @@
                 S: Math.round((scores.S / totalNonNeutral) * 100)
             };
 
+            lastPercentages = percentages;
+
             // Afficher les pourcentages et barres
             setTimeout(() => {
-                document.getElementById('score-e-percent').textContent = `${percentages.E}%`;
-                document.getElementById('score-o-percent').textContent = `${percentages.O}%`;
-                document.getElementById('score-s-percent').textContent = `${percentages.S}%`;
-                
-                document.getElementById('bar-e').style.width = `${percentages.E}%`;
-                document.getElementById('bar-o').style.width = `${percentages.O}%`;
-                document.getElementById('bar-s').style.width = `${percentages.S}%`;
+                dom.scoreEPercent.textContent = `${percentages.E}%`;
+                dom.scoreOPercent.textContent = `${percentages.O}%`;
+                dom.scoreSPercent.textContent = `${percentages.S}%`;
+
+                dom.barE.style.width = `${percentages.E}%`;
+                dom.barO.style.width = `${percentages.O}%`;
+                dom.barS.style.width = `${percentages.S}%`;
 
                 // Mettre à jour le résumé des résultats
-                document.getElementById('results-summary').textContent = `E = ${percentages.E}% | O = ${percentages.O}% | S = ${percentages.S}%`;
+                dom.resultsSummary.textContent = `E = ${percentages.E}% | O = ${percentages.O}% | S = ${percentages.S}%`;
             }, 500);
 
             // Déterminer le profil selon les nouvelles règles
@@ -545,27 +600,37 @@
             };
 
             const profileData = profiles[profile];
-            document.getElementById('profile-description').innerHTML = `
+            dom.profileDescription.innerHTML = `
                 <h3 class="text-lg font-semibold text-${profileData.color} mb-3">Ta posture actuelle : ${profileData.title}</h3>
                 <p class="text-gray-800">${profileData.description}</p>
             `;
+
+            lastProfileDetails = {
+                title: `Ta posture actuelle : ${profileData.title}`,
+                description: profileData.description
+            };
 
             showAdviceSection();
         }
 
         // Profil mixte
         function showMixedProfile(percentages) {
-            document.getElementById('profile-description').innerHTML = `
+            dom.profileDescription.innerHTML = `
                 <h3 class="text-lg font-semibold text-purple-800 mb-3">Profil mixte</h3>
                 <p class="text-gray-800">Tu combines plusieurs postures. Choisis une habitude "réflexive" à tester cette semaine (reformuler, vérifier les sources, expliquer pourquoi).</p>
             `;
+
+            lastProfileDetails = {
+                title: 'Profil mixte',
+                description: 'Tu combines plusieurs postures. Choisis une habitude "réflexive" à tester cette semaine (reformuler, vérifier les sources, expliquer pourquoi).'
+            };
 
             showAdviceSection();
         }
 
         // Conseils vers l'engagé réflexif (toujours afficher)
         function showAdviceSection() {
-            document.getElementById('advice-section').innerHTML = `
+            dom.adviceSection.innerHTML = `
                 <h3 class="text-lg font-semibold text-blue-800 mb-4">Conseils "vers l'engagé réflexif"</h3>
                 <div class="space-y-3">
                     <div class="flex items-start">
@@ -594,15 +659,20 @@
 
         // Profil indéterminé
         function showIndeterminateProfile() {
-            document.getElementById('profile-description').innerHTML = `
+            dom.profileDescription.innerHTML = `
                 <h3 class="text-lg font-semibold text-gray-800 mb-3">Profil indéterminé</h3>
                 <p class="text-gray-800">Tes réponses ne permettent pas de définir une posture claire face à l'IA. Tu es peut-être encore en phase de découverte.</p>
             `;
 
-            document.getElementById('advice-section').innerHTML = `
+            dom.adviceSection.innerHTML = `
                 <h3 class="text-lg font-semibold text-blue-800 mb-3">Conseils pour commencer</h3>
                 <p class="text-blue-800">Prends le temps d'expérimenter avec l'IA dans un cadre scolaire. Commence par de petites questions et observe comment elle peut t'aider à apprendre.</p>
             `;
+
+            lastProfileDetails = {
+                title: 'Profil indéterminé',
+                description: 'Tes réponses ne permettent pas de définir une posture claire face à l\'IA. Tu es peut-être encore en phase de découverte.'
+            };
         }
 
         // Télécharger le PDF
@@ -620,23 +690,21 @@
             
             const totalNonNeutral = scores.E + scores.O + scores.S;
             if (totalNonNeutral > 0) {
-                const percentages = {
-                    E: Math.round((scores.E / totalNonNeutral) * 100),
-                    O: Math.round((scores.O / totalNonNeutral) * 100),
-                    S: Math.round((scores.S / totalNonNeutral) * 100)
-                };
-                
                 doc.setFontSize(12);
-                doc.text(`E = ${percentages.E}% | O = ${percentages.O}% | S = ${percentages.S}%`, 20, 60);
-                
+                doc.text(`E = ${lastPercentages.E}% | O = ${lastPercentages.O}% | S = ${lastPercentages.S}%`, 20, 60);
+
                 // Détails des pourcentages
-                doc.text(`Engagé réflexif (E) : ${percentages.E}%`, 30, 75);
-                doc.text(`Occasionnel légaliste (O) : ${percentages.O}%`, 30, 85);
-                doc.text(`Scolaire opportuniste (S) : ${percentages.S}%`, 30, 95);
+                doc.text(`Engagé réflexif (E) : ${lastPercentages.E}%`, 30, 75);
+                doc.text(`Occasionnel légaliste (O) : ${lastPercentages.O}%`, 30, 85);
+                doc.text(`Scolaire opportuniste (S) : ${lastPercentages.S}%`, 30, 95);
+            } else {
+                doc.setFontSize(12);
+                doc.text('Aucun résultat disponible. Termine le questionnaire pour générer ton rapport.', 20, 60);
             }
-            
+
             // Interprétation du profil
-            const profileText = document.getElementById('profile-description').textContent;
+            const profileTextParts = [lastProfileDetails.title, lastProfileDetails.description].filter(Boolean);
+            const profileText = profileTextParts.join(' — ');
             
             doc.setFontSize(14);
             doc.text('Interprétation :', 20, 115);
@@ -672,60 +740,115 @@
 
         // Revoir les réponses
         function reviewAnswers() {
-            let reviewHTML = '<div class="space-y-4">';
-            
-            questions.forEach((question, index) => {
-                const userAnswerIndex = answers[index];
-                const userAnswer = question.answers[userAnswerIndex];
-                const answerType = userAnswer.type;
-                
-                let typeColor = 'gray';
-                let typeName = 'Neutre';
-                
-                if (answerType === 'E') {
-                    typeColor = 'green';
-                    typeName = 'Engagé réflexif';
-                } else if (answerType === 'O') {
-                    typeColor = 'blue';
-                    typeName = 'Occasionnel légaliste';
-                } else if (answerType === 'S') {
-                    typeColor = 'orange';
-                    typeName = 'Scolaire opportuniste';
-                }
-                
-                reviewHTML += `
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">Question ${index + 1}</h4>
-                        <p class="text-gray-600 mb-3">${question.text}</p>
-                        <div class="bg-${typeColor}-50 border border-${typeColor}-200 rounded p-3">
-                            <p class="text-${typeColor}-800 font-medium">Ta réponse :</p>
-                            <p class="text-${typeColor}-800">${userAnswer.text}</p>
-                            <span class="inline-block mt-2 px-2 py-1 bg-${typeColor}-100 text-${typeColor}-800 text-xs rounded-full">${typeName}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            reviewHTML += '</div>';
-            
-            // Créer une modal pour afficher les réponses
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl shadow-lg max-w-4xl max-h-full overflow-y-auto p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Révision de tes réponses</h2>
-                        <button onclick="closeReviewModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-                    </div>
-                    ${reviewHTML}
-                    <div class="mt-6 text-center">
-                        <button onclick="closeReviewModal()" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                            Fermer
-                        </button>
-                    </div>
-                </div>
-            `;
-            
+
+            const dialog = document.createElement('div');
+            dialog.className = 'bg-white rounded-xl shadow-lg max-w-4xl w-full max-h-full overflow-y-auto p-6';
+
+            const header = document.createElement('div');
+            header.className = 'flex justify-between items-center mb-6';
+
+            const title = document.createElement('h2');
+            title.className = 'text-2xl font-bold text-gray-800';
+            title.textContent = 'Révision de tes réponses';
+
+            const closeIconButton = document.createElement('button');
+            closeIconButton.type = 'button';
+            closeIconButton.className = 'text-gray-500 hover:text-gray-700 text-2xl';
+            closeIconButton.setAttribute('aria-label', 'Fermer');
+            closeIconButton.innerHTML = '&times;';
+            closeIconButton.addEventListener('click', closeReviewModal);
+
+            header.appendChild(title);
+            header.appendChild(closeIconButton);
+
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'space-y-4';
+
+            questions.forEach((question, index) => {
+                const userAnswerIndex = answers[index];
+                const userAnswer = typeof userAnswerIndex === 'number' ? question.answers[userAnswerIndex] : undefined;
+
+                const questionBlock = document.createElement('div');
+                questionBlock.className = 'border border-gray-200 rounded-lg p-4';
+
+                const questionTitle = document.createElement('h4');
+                questionTitle.className = 'font-semibold text-gray-800 mb-2';
+                questionTitle.textContent = `Question ${index + 1}`;
+
+                const questionText = document.createElement('p');
+                questionText.className = 'text-gray-600 mb-3';
+                questionText.textContent = question.text;
+
+                const answerContainer = document.createElement('div');
+
+                if (userAnswer) {
+                    let typeColor = 'gray';
+                    let typeName = 'Neutre';
+
+                    if (userAnswer.type === 'E') {
+                        typeColor = 'green';
+                        typeName = 'Engagé réflexif';
+                    } else if (userAnswer.type === 'O') {
+                        typeColor = 'blue';
+                        typeName = 'Occasionnel légaliste';
+                    } else if (userAnswer.type === 'S') {
+                        typeColor = 'orange';
+                        typeName = 'Scolaire opportuniste';
+                    }
+
+                    answerContainer.className = `bg-${typeColor}-50 border border-${typeColor}-200 rounded p-3`;
+
+                    const answerLabel = document.createElement('p');
+                    answerLabel.className = `text-${typeColor}-800 font-medium`;
+                    answerLabel.textContent = 'Ta réponse :';
+
+                    const answerText = document.createElement('p');
+                    answerText.className = `text-${typeColor}-800`;
+                    answerText.textContent = userAnswer.text;
+
+                    const badge = document.createElement('span');
+                    badge.className = `inline-block mt-2 px-2 py-1 bg-${typeColor}-100 text-${typeColor}-800 text-xs rounded-full`;
+                    badge.textContent = typeName;
+
+                    answerContainer.appendChild(answerLabel);
+                    answerContainer.appendChild(answerText);
+                    answerContainer.appendChild(badge);
+                } else {
+                    answerContainer.className = 'bg-gray-50 border border-gray-200 rounded p-3';
+
+                    const noAnswer = document.createElement('p');
+                    noAnswer.className = 'text-gray-700';
+                    noAnswer.textContent = 'Tu n\'as pas répondu à cette question.';
+
+                    answerContainer.appendChild(noAnswer);
+                }
+
+                questionBlock.appendChild(questionTitle);
+                questionBlock.appendChild(questionText);
+                questionBlock.appendChild(answerContainer);
+
+                contentWrapper.appendChild(questionBlock);
+            });
+
+            const footer = document.createElement('div');
+            footer.className = 'mt-6 text-center';
+
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors';
+            closeButton.textContent = 'Fermer';
+            closeButton.addEventListener('click', closeReviewModal);
+
+            footer.appendChild(closeButton);
+
+            dialog.appendChild(header);
+            dialog.appendChild(contentWrapper);
+            dialog.appendChild(footer);
+
+            modal.appendChild(dialog);
+
             document.body.appendChild(modal);
         }
 
@@ -741,12 +864,15 @@
         function restartQuiz() {
             currentQuestionIndex = 0;
             answers = [];
-            scores = { E: 0, O: 0, S: 0, N: 0 };
-            
-            document.getElementById('results-screen').classList.add('hidden');
-            document.getElementById('welcome-screen').classList.remove('hidden');
+            scores = { E: 0, O: 0, S: 0 };
+            lastPercentages = { E: 0, O: 0, S: 0 };
+            lastProfileDetails = { title: '', description: '' };
+
+            dom.resultsScreen.classList.add('hidden');
+            dom.questionScreen.classList.add('hidden');
+            dom.welcomeScreen.classList.remove('hidden');
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'992a5c9f578c1327',t:'MTc2MTE1MDQ0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
 
