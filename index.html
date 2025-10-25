@@ -10,6 +10,17 @@
         body {
             box-sizing: border-box;
         }
+        
+        .app-background {
+            min-height: 100vh;
+            background-color: #f0f4ff;
+            background-image: url('assets/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
         .fade-in {
             animation: fadeIn 0.5s ease-in;
         }
@@ -57,7 +68,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full font-sans">
+<body class="app-background font-sans">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Écran d'accueil -->
         <div id="welcome-screen" class="fade-in">
