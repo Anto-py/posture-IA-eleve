@@ -1,14 +1,15 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon rapport à l'IA à l'école</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mon rapport à l'IA à l'école</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
         /* === CHARTE RETROFUTURISME === */
         :root {
             --retro-teal: #127676;
@@ -646,174 +647,163 @@
     </style>
 </head>
 <body>
-    <div class="app-background">
-        <div class="page-frame">
-            <div class="container">
-                <!-- Écran d'accueil -->
-                <div id="welcome-screen" class="fade-in">
-                    <div class="retro-card">
-                        <span class="corner-flourish top-left">❧</span>
-                        <span class="corner-flourish top-right">❧</span>
-                        <span class="corner-flourish bottom-left">❧</span>
-                        <span class="corner-flourish bottom-right">❧</span>
-                        <div style="text-align: center;">
-                            <div class="retro-icon-circle">🤖</div>
-                            <h1>Mon rapport à l'IA à l'école</h1>
-                            <p style="color: var(--retro-ink); font-size: 1.1rem; margin-top: 1rem;">
+<div class="app-background">
+<div class="page-frame">
+<div class="container">
+<!-- Écran d'accueil -->
+<div class="fade-in" id="welcome-screen">
+<div class="retro-card">
+<span class="corner-flourish top-left">❧</span>
+<span class="corner-flourish top-right">❧</span>
+<span class="corner-flourish bottom-left">❧</span>
+<span class="corner-flourish bottom-right">❧</span>
+<div style="text-align: center;">
+<div class="retro-icon-circle">🤖</div>
+<h1>Mon rapport à l'IA à l'école</h1>
+<p style="color: var(--retro-ink); font-size: 1.1rem; margin-top: 1rem;">
                                 Découvre ta posture face à l'intelligence artificielle
                             </p>
-                        </div>
-
-                        <div class="retro-separator">
-                            <span class="flourish">✿</span>
-                        </div>
-
-                        <div class="retro-info-box">
-                            <h3 style="margin: 0; font-size: 1rem;">À PROPOS DE CE QUESTIONNAIRE</h3>
-                            <ul>
-                                <li><strong>Anonyme</strong> : Tes réponses restent privées</li>
-                                <li><strong>Sans jugement</strong> : Il n'y a pas de bonnes ou mauvaises réponses</li>
-                                <li><strong>20 questions</strong> : Environ 8 minutes de ton temps</li>
-                                <li><strong>Résultat personnalisé</strong> : Tu recevras des conseils adaptés</li>
-                            </ul>
-                        </div>
-
-                        <div style="text-align: center; margin-top: 2rem;">
-                            <button onclick="startQuiz()" class="retro-btn-pill">
-                                <span class="retro-btn-pill-text">Commencer le questionnaire</span>
-                                <span class="retro-btn-pill-icon">»</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Écran des questions -->
-                <div id="question-screen" class="hidden fade-in">
-                    <div class="retro-card">
-                        <span class="corner-flourish top-left">❧</span>
-                        <span class="corner-flourish top-right">❧</span>
-                        <span class="corner-flourish bottom-left">❧</span>
-                        <span class="corner-flourish bottom-right">❧</span>
-                        <!-- Barre de progression -->
-                        <div class="progress-container">
-                            <div class="progress-info">
-                                <span>Question <span id="current-question">1</span> sur 20</span>
-                                <span><span id="progress-percent">5</span>%</span>
-                            </div>
-                            <div class="progress-bar-bg">
-                                <div id="progress-bar" class="progress-bar-fill" style="width: 5%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Question -->
-                        <div class="question-text" id="question-text"></div>
-                        
-                        <div id="answers-container">
-                            <!-- Les réponses seront générées ici -->
-                        </div>
-
-                        <!-- Boutons de navigation -->
-                        <div class="nav-buttons">
-                            <button id="prev-btn" onclick="previousQuestion()" class="nav-btn nav-btn-prev" disabled>
+</div>
+<div class="retro-separator">
+<span class="flourish">✿</span>
+</div>
+<div class="retro-info-box">
+<h3 style="margin: 0; font-size: 1rem;">À PROPOS DE CE QUESTIONNAIRE</h3>
+<ul>
+<li><strong>Anonyme</strong> : Tes réponses restent privées</li>
+<li><strong>Sans jugement</strong> : Il n'y a pas de bonnes ou mauvaises réponses</li>
+<li><strong>20 questions</strong> : Environ 8 minutes de ton temps</li>
+<li><strong>Résultat personnalisé</strong> : Tu recevras des conseils adaptés</li>
+</ul>
+</div>
+<div style="text-align: center; margin-top: 2rem;">
+<button class="retro-btn-pill" onclick="startQuiz()">
+<span class="retro-btn-pill-text">Commencer le questionnaire</span>
+<span class="retro-btn-pill-icon">»</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Écran des questions -->
+<div class="hidden fade-in" id="question-screen">
+<div class="retro-card">
+<span class="corner-flourish top-left">❧</span>
+<span class="corner-flourish top-right">❧</span>
+<span class="corner-flourish bottom-left">❧</span>
+<span class="corner-flourish bottom-right">❧</span>
+<!-- Barre de progression -->
+<div class="progress-container">
+<div class="progress-info">
+<span>Question <span id="current-question">1</span> sur 20</span>
+<span><span id="progress-percent">5</span>%</span>
+</div>
+<div class="progress-bar-bg">
+<div class="progress-bar-fill" id="progress-bar" style="width: 5%"></div>
+</div>
+</div>
+<!-- Question -->
+<div class="question-text" id="question-text"></div>
+<div id="answers-container">
+<!-- Les réponses seront générées ici -->
+</div>
+<!-- Boutons de navigation -->
+<div class="nav-buttons">
+<button class="nav-btn nav-btn-prev" disabled="" id="prev-btn" onclick="previousQuestion()">
                                 ← Précédent
                             </button>
-                            <button id="next-btn" onclick="nextQuestion()" class="nav-btn nav-btn-next" disabled>
+<button class="nav-btn nav-btn-next" disabled="" id="next-btn" onclick="nextQuestion()">
                                 Suivant →
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Écran des résultats -->
-                <div id="results-screen" class="hidden fade-in">
-                    <div class="retro-card">
-                        <span class="corner-flourish top-left">❧</span>
-                        <span class="corner-flourish top-right">❧</span>
-                        <span class="corner-flourish bottom-left">❧</span>
-                        <span class="corner-flourish bottom-right">❧</span>
-                        <div class="results-header">
-                            <div class="retro-icon-circle">✨</div>
-                            <h1>Ton rapport personnel</h1>
-                            <p style="color: var(--retro-ink); margin-top: 0.75rem;">Voici ton profil face à l'IA à l'école</p>
-                        </div>
-
-                        <!-- Bloc Résultats -->
-                        <div class="results-summary-box">
-                            <div class="results-summary-title">RÉSULTATS</div>
-                            <div class="results-summary-values" id="results-summary">
-                                <!-- E = X% | O = Y% | S = Z% sera généré ici -->
-                            </div>
-                        </div>
-
-                        <div class="retro-separator">
-                            <span class="flourish">❀</span>
-                        </div>
-
-                        <!-- Graphique des résultats -->
-                        <div class="results-grid">
-                            <div>
-                                <h3 style="margin-bottom: 1rem;">RÉPARTITION DE TES RÉPONSES</h3>
-                                <div class="score-bars">
-                                    <div class="score-bar-item">
-                                        <div class="score-bar-header">
-                                            <span class="score-label-e">Engagé réflexif</span>
-                                            <span id="score-e-percent" class="score-label-e">0%</span>
-                                        </div>
-                                        <div class="score-bar-bg">
-                                            <div id="bar-e" class="score-bar-fill type-e" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="score-bar-item">
-                                        <div class="score-bar-header">
-                                            <span class="score-label-o">Occasionnel légaliste</span>
-                                            <span id="score-o-percent" class="score-label-o">0%</span>
-                                        </div>
-                                        <div class="score-bar-bg">
-                                            <div id="bar-o" class="score-bar-fill type-o" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="score-bar-item">
-                                        <div class="score-bar-header">
-                                            <span class="score-label-s">Scolaire opportuniste</span>
-                                            <span id="score-s-percent" class="score-label-s">0%</span>
-                                        </div>
-                                        <div class="score-bar-bg">
-                                            <div id="bar-s" class="score-bar-fill type-s" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="profile-description" class="profile-box">
-                                <!-- Description du profil sera générée ici -->
-                            </div>
-                        </div>
-
-                        <!-- Conseils personnalisés -->
-                        <div id="advice-section" class="advice-box">
-                            <!-- Conseils seront générés ici -->
-                        </div>
-
-                        <!-- Boutons d'action -->
-                        <div class="action-buttons">
-                            <button onclick="reviewAnswers()" class="retro-btn-secondary">
+</div>
+</div>
+</div>
+<!-- Écran des résultats -->
+<div class="hidden fade-in" id="results-screen">
+<div class="retro-card">
+<span class="corner-flourish top-left">❧</span>
+<span class="corner-flourish top-right">❧</span>
+<span class="corner-flourish bottom-left">❧</span>
+<span class="corner-flourish bottom-right">❧</span>
+<div class="results-header">
+<div class="retro-icon-circle">✨</div>
+<h1>Ton rapport personnel</h1>
+<p style="color: var(--retro-ink); margin-top: 0.75rem;">Voici ton profil face à l'IA à l'école</p>
+</div>
+<!-- Bloc Résultats -->
+<div class="results-summary-box">
+<div class="results-summary-title">RÉSULTATS</div>
+<div class="results-summary-values" id="results-summary">
+<!-- E = X% | O = Y% | S = Z% sera généré ici -->
+</div>
+</div>
+<div class="retro-separator">
+<span class="flourish">❀</span>
+</div>
+<!-- Graphique des résultats -->
+<div class="results-grid">
+<div>
+<h3 style="margin-bottom: 1rem;">RÉPARTITION DE TES RÉPONSES</h3>
+<div class="score-bars">
+<div class="score-bar-item">
+<div class="score-bar-header">
+<span class="score-label-e">Engagé réflexif</span>
+<span class="score-label-e" id="score-e-percent">0%</span>
+</div>
+<div class="score-bar-bg">
+<div class="score-bar-fill type-e" id="bar-e" style="width: 0%"></div>
+</div>
+</div>
+<div class="score-bar-item">
+<div class="score-bar-header">
+<span class="score-label-o">Occasionnel légaliste</span>
+<span class="score-label-o" id="score-o-percent">0%</span>
+</div>
+<div class="score-bar-bg">
+<div class="score-bar-fill type-o" id="bar-o" style="width: 0%"></div>
+</div>
+</div>
+<div class="score-bar-item">
+<div class="score-bar-header">
+<span class="score-label-s">Scolaire opportuniste</span>
+<span class="score-label-s" id="score-s-percent">0%</span>
+</div>
+<div class="score-bar-bg">
+<div class="score-bar-fill type-s" id="bar-s" style="width: 0%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="profile-box" id="profile-description">
+<!-- Description du profil sera générée ici -->
+</div>
+</div>
+<!-- Conseils personnalisés -->
+<div class="advice-box" id="advice-section">
+<!-- Conseils seront générés ici -->
+</div>
+<!-- Boutons d'action -->
+<div class="action-buttons">
+<button class="retro-btn-secondary" onclick="reviewAnswers()">
                                 👁️ Revoir mes réponses
                             </button>
-                            <button onclick="downloadPDF()" class="retro-btn-pill">
-                                <span class="retro-btn-pill-text">📄 Télécharger mon rapport</span>
-                                <span class="retro-btn-pill-icon">↓</span>
-                            </button>
-                            <button onclick="restartQuiz()" class="retro-btn-secondary">
+<button class="retro-btn-pill" onclick="downloadPDF()">
+<span class="retro-btn-pill-text">📄 Télécharger mon rapport</span>
+<span class="retro-btn-pill-icon">↓</span>
+</button>
+<button class="retro-btn-secondary" onclick="restartQuiz()">
                                 🔄 Recommencer
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
+</div>
+</div>
+</div>
+</div>
+<div class="ab-attribution" style="text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(128,128,128,0.25);font-size:0.8rem;opacity:0.65;">
+<a href="https://www.linkedin.com/in/antonin-bareau/" rel="noopener" style="font-weight:bold;color:inherit;text-decoration:none;" target="_blank">Antonin Bareau</a>
+   — 
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="noopener" style="color:inherit;text-decoration:none;" target="_blank">Licence CC BY-SA 4.0</a>
+</div></div>
+</div>
+<script>
         // Questions et réponses
         const questions = [
             {
@@ -1263,11 +1253,6 @@
                 <div class="advice-item">
                     <span class="advice-number">5</span>
                     <span class="advice-text">Rends transparent l'usage de l'IA (dire comment et pourquoi).</span>
-                <div class="ab-attribution" style="text-align:center;margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(128,128,128,0.25);font-size:0.8rem;opacity:0.65;">
-  <a href="https://www.linkedin.com/in/antonin-bareau/" target="_blank" rel="noopener" style="font-weight:bold;color:inherit;text-decoration:none;">Antonin Bareau</a>
-  &nbsp;&mdash;&nbsp;
-  <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Licence CC BY-SA 4.0</a>
-</div>
 </div>
             `;
         }
@@ -1508,7 +1493,5 @@
             dom.welcomeScreen.classList.remove('hidden');
         }
     </script>
-
 </body>
 </html>
-
